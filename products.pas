@@ -4,8 +4,6 @@ interface
 uses errors;
 uses tabular;
 
-const tab_lengths: array of integer = (8, 32, 10);
-
 type product = record
   code: integer;
   name: string;
@@ -19,8 +17,11 @@ function validateString(s: string): string;
 implementation
 
 function makeFromString(s: string): product;
+var err: integer;
 begin
-  
+  val(get_next(s,8).Trim(), Result.code, err);
+  Result.name := get_next(s,32);
+  val(get_next(s,10).Trim(), Result.cost, err);
 end;
 
 function validateString(s: string): string;
@@ -28,6 +29,7 @@ var err_string: string;
 var t_s: string;
 var t_i: integer;
 var t_err: integer;
+var tab_lengths: array of integer = (8, 32, 10);
 begin
   err_string := '';
   
@@ -53,19 +55,24 @@ begin
     if t_s.StartsWith('_') then append_err(err_string, 'Наименование товара не может начинаться с нижнего подчеркивания.');
     
     // Проверка на отсутствие пробелов внутри имени
-    if t_s.Contains(' ') then append_err(err_string, 'Внутри наименования товара не должно быть пробелов. В качестве разделителя используйте нижнее подчёркивание.');
+    if pos(' ', t_s) <> 0 then append_err(err_string, 'Внутри наименования товара не должно быть пробелов. В качестве разделителя используйте нижнее подчёркивание.');
     
     // -------- СТОИМОСТЬ ТОВАРА --------
     t_s := get_next(s, 10).Trim();
     
-    val(t_s, t_i, t_err);
-    // Проверка на отсутствие лишних символов в стоимости товара
-    if t_err <> 0 then append_err(err_string, 'Стоимость товара должна являться вещественным числом максимум из 10 символов (7 цифр перед точкой, сама точка и две обязательных цифры после точки), не должно быть букв и других символов.');
-    t_i := pos('.', t_s);
-    // Проверка на наличие точки и конкретно двух цифр после неё
-    if (t_i = 0) or (t_s.Length - t_i <> 2) then append_err(err_string, 'В стоимости товара обязательно должно присутствовать две цифры после точки, даже если дробное значение равно нулю (тогда стоимость должна иметь ".00" в конце).');
-    // Проверка 
+    // Проверка на начало стоимости на 0
+    if (t_s[0] = '0') then append_err(err_string, 'Стоимость товара не может начинаться с 0.');
     
+    // Проверка на отсутствие + и - в начале
+    if (t_s[0] = '+') or (t_s[0] = '-') then append_err(err_string, 'Стоимость товара не должна начинаться со знаков "+" или "-". Она всегда положительна.');
+    
+    // Проверка на отсутствие лишних символов в стоимости товара
+    val(t_s, t_i, t_err);
+    if t_err <> 0 then append_err(err_string, 'Стоимость товара должна являться вещественным числом максимум из 10 символов (7 цифр перед точкой, сама точка и две обязательных цифры после точки), не должно быть букв и других символов.');
+    
+    // Проверка на наличие точки и конкретно двух цифр после неё
+    t_i := pos('.', t_s);
+    if (t_i = 0) or (t_s.Length - t_i <> 2) then append_err(err_string, 'В стоимости товара обязательно должно присутствовать две цифры после точки, даже если дробное значение равно нулю (тогда стоимость должна иметь ".00" в конце).');
     
   end;
   Result := err_string;
