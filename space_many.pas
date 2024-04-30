@@ -2,21 +2,24 @@
 interface
 
 function get_next(var s: string): string;
-function validate(s: string; elements_count: integer): boolean;
+function validate(s: string; max_elements_count: integer): boolean;
 
 implementation
 
 function get_next(var s: string): string;
 var i: integer;
 begin
-  i := 0;
-  while s[i] <> ' ' do i := i + 1;
-  Result := copy(s, 0, i);
-  while s[i] = ' ' do i := i + 1;
-  s := copy(s, i, s.Length - i);
+  if s = '' then Result := ''
+  else begin
+    i := 0;
+    while s[i] <> ' ' do i := i + 1;
+    Result := copy(s, 0, i);
+    while s[i] = ' ' do i := i + 1;
+    s := copy(s, i, s.Length - i);
+  end;
 end;
 
-function validate(s: string; elements_count: integer): boolean;
+function validate(s: string; max_elements_count: integer): boolean;
 var i, count: integer;
 var space_flag: boolean;
 begin
@@ -28,7 +31,7 @@ begin
     end
     else space_flag := false;
   end;
-  Result := count = elements_count
+  Result := ((s[0] <> ' ') or (s[s.Length-1] <> ' ')) and (count <= max_elements_count)
 end;
 
 end.

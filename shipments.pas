@@ -3,34 +3,185 @@ interface
 
 uses errors;
 uses space_many;
+uses consts;
+uses products;
+uses orders;
 
 type shipment = record
-  date: record
-    day: 1..31;
-    month: 1..12;
-    year: 2000..2100;
+  date: record // Дата ОТГРУЗКИ
+    day: integer;
+    month: integer;
+    year: integer;
   end;
   order_code: integer;
-  prod_list: array of record
+  prod_list: array[1..max_products] of record
     code: integer;
     amount: integer;
   end;
 end;
-list_ship = array of shipment;
+list_ship = array[1..possible_records] of shipment;
 
-function makeFromString(s: string): shipment;
-function validateString(s: string): string;
+function makeShipmentObjectFromString(s: string): shipment;
+function validateShipmentString(s: string): string;
+function validateShipmentObject(s: shipment; ol: list_ord; pl: list_prod): string;
 
 implementation
 
-function makeFromString(s: string): shipment;
+function makeShipmentObjectFromString(s: string): shipment;
+var i, err: integer;
 begin
+  val(get_next(s), Result.date.day, err);
+  Result.date.month := months.IndexOf(get_next(s));
+  val(get_next(s), Result.date.year, err);
+  val(get_next(s), Result.order_code, err);
   
+  i := 1;
+  while (i <= max_products) and (s <> '') do begin
+    val(get_next(s), Result.prod_list[i].code, err);
+    val(get_next(s), Result.prod_list[i].amount, err);
+  end;
 end;
 
-function validateString(s: string): string;
+function validateShipmentString(s: string): string;
+var err_string, t_err_string: string;
+var t_s: string;
+var t_i, i: integer;
+var t_err: integer;
+var t_flag: boolean;
+var t_date: record
+  day: integer;
+  month: integer;
+  year: integer;
+end;
 begin
+  err_string := '';
   
+  // Проверка на соблюдение заданного формата данных.
+  if not validate(s, max_products * 2 + 4) then append_err(err_string, 'Не соблюдён формат данных. Они должны быть разделены пробелами (любым кол-вом) и не должно быть больше элементов, чем 4 основных (дата и код заказа) и до ' + max_products.ToString() + ' объектов товаров (каждый состоит из кода и количества, итого в общем максимум ' + (max_products * 2 + 4).ToString() + ' элементов, разделённых пробелами). Также убедитесь, что в начале и конце файла нет пробелов.')
+  else begin
+    // -------- ДАТА (ДЕНЬ) --------
+    t_s := get_next(s);
+    t_flag := true; // Флаг правильности даты
+    val(t_s, t_date.day, t_err);
+    
+    // Проверка на длину строки и на отсутствие лишних символов
+    if (t_s.Length <> 2) or (t_err <> 0) then begin 
+      append_err(err_string, 'День должен состоять из двух цифр (если число меньше 10, то следует добавить 0 в начало).');
+      t_flag := false;
+    end
+    else begin
+      // Проверка на то, чтобы день не был больше 31 или меньше 1
+      if (t_date.day > 31) then append_err(err_string, 'День не может быть больше 31.');
+      if (t_date.day < 1) then append_err(err_string, 'День не может быть меньше 1.');
+    end;
+    
+    // -------- ДАТА (МЕСЯЦ) --------
+    t_s := get_next(s);
+    
+    // Проверка, что задан верный месяц
+    if not months.Contains(t_s) then begin 
+      append_err(err_string, 'Месяц должен состоять из трёх латинских букв по началу их названия (например, "JAN" для января (January)).');
+      t_flag := false;
+    end
+    else begin
+      t_date.month := months.IndexOf(t_s);
+      if t_flag then begin
+        // Проверка, является ли последний день чётного месяца 30-м
+        if (t_date.month mod 2 = 0) and (t_date.month <> 2) and (t_date.day > 30) then append_err(err_string, 'Чётные месяцы (кроме февраля) имеют всего 30 дней.');
+        // Проверка, является ли месяц февралём и день меньшим, чем 30
+        if (t_date.month = 2) and (t_date.day > 29) then append_err(err_string, 'В феврале не может быть больше 29 дней.');
+      end;
+    end;
+    
+    // -------- ДАТА (ГОД) --------
+    t_s := get_next(s);
+    
+    // Проверка, что нет лишних символов
+    val(t_s, t_date.year, t_err);
+    if (t_err <> 0) or (t_date.year < 2000) or (t_date.year > 2099) then begin
+      append_err(err_string, 'Год должен состоять из четырёх цифр и означать год 21 века (20xx) или 2000-й год.');
+      t_flag := false;
+    end
+    else begin
+      if t_flag then begin
+        // Проверка на високосные года
+        if (t_date.month = 2) and (t_date.day = 29) and ((t_date.year mod 4 <> 0) or ((t_date.year mod 100 = 0) and (t_date.year mod 400 <> 0))) then append_err(err_string, '29 февраля может быть только в високосные года.');
+      end;
+    end;
+    
+    // -------- КОД ЗАКАЗА --------
+    t_s := get_next(s);
+    
+    // Проверка на начало кода заказа (не должно быть нуля в начале)
+    if t_s[1] = '0' then append_err(err_string, 'Код заказа не может начинаться с 0.');
+    
+    // Проверка на отсутствие лишних символов в коде заказа
+    val(t_s, t_i, t_err);
+    if (t_err <> 0) or (t_i > 99999999) or (t_s[1] = '+') or (t_s[1] = '-') then append_err(err_string, 'Код заказа должен состоять ТОЛЬКО максимум из 8 цифр, не должно быть букв и других символов.');
+    
+    // -------- СПИСОК ТОВАРОВ --------
+    i := 0;
+    t_flag := false; // флаг товара (если найден ВОЗМОЖНЫЙ код товара, то true и ждем кол-во товара, затем снова ставим false)
+    while (s <> '') do begin
+      t_s := get_next(s);
+      
+      if t_flag = false then begin
+        i := i + 1;
+        t_err_string := '';
+        
+        // Проверка на начало кода НЕ с нуля
+        if t_s[1] = '0' then append_err(t_err_string, '(Товар ' + i.ToString() + ') Код товара не может начинаться с 0.');
+        
+        // Проверка на отсутствие лишних символов в коде товара
+        val(t_s, t_i, t_err);
+        if (t_err <> 0) or (t_i > 99999999) or (t_s[1] = '+') or (t_s[1] = '-') then append_err(t_err_string, '(Товар ' + i.ToString() + ') Код товара должен состоять ТОЛЬКО максимум из 8 цифр, не должно быть букв и других символов.');
+        
+        if t_err_string <> '' then err_string := err_string + t_err_string;
+        t_flag := true;
+      end
+      else begin
+        t_err_string := '';
+        
+        // Проверка на начало кол-ва НЕ с нуля
+        if t_s[1] = '0' then append_err(t_err_string, '(Товар ' + i.ToString() + ') Кол-во товара не может начинаться с 0.');
+        
+        // Проверка на отсутствие лишних символов в кол-ве товара
+        val(t_s, t_i, t_err);
+        if (t_err <> 0) or (t_s[1] = '+') or (t_s[1] = '-') then append_err(t_err_string, '(Товар ' + i.ToString() + ') Кол-во товара должен состоять ТОЛЬКО из цифр, не должно быть букв и других символов.');
+        
+        if t_err_string <> '' then err_string := err_string + t_err_string;
+        t_flag := false;
+      end;
+    end;
+  end;
+  Result := err_string;
+end;
+
+function validateShipmentObject(s: shipment; ol: list_ord; pl: list_prod): string;
+var i, j: integer;
+var flag: boolean;
+var err_string: string;
+begin
+  err_string := '';
+  for i := 1 to possible_records do begin
+    if s.order_code <> 0 then begin
+      flag := false;
+      for j := 1 to possible_records do begin
+        if ol[j].code = s.order_code then flag := true;
+      end;
+      if not flag then append_err(err_string, '(Товар ' + i.ToString() + ') Код заказа не соответствует ни одному из зарегистрированных в файле заказов.');
+    end;
+  end;
+  for i := 1 to max_products do begin
+    if s.prod_list[i].code <> 0 then begin
+      flag := false;
+      for j := 1 to possible_records do begin
+        if pl[j].code = s.prod_list[i].code then flag := true;
+      end;
+      if not flag then append_err(err_string, '(Товар ' + i.ToString() + ') Код товара не соответствует ни одному из зарегистрированных в файле товаров.');
+    end;
+  end;
+  Result := err_string;
 end;
 
 end.
