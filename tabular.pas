@@ -37,7 +37,7 @@ begin
     lengths_sum := 0;
     for i := 0 to lengths.Length-2 do begin
       lengths_sum := lengths_sum + lengths[i] + 1;
-      if s[lengths_sum] <> '|' then append_err(err_string, 'ФОРМАТ ДАННЫХ: Неверная длина ' + (i+1).ToString() + '-го поля. В нём должно находиться ровно ' + lengths[i].ToString() + ' символов, включая пробелы, а на ' + lengths_sum.ToString() + '-й позиции строки должен находиться разделитель "|".');
+      if s[lengths_sum] <> '|' then append_err(err_string, 'ФОРМАТ ДАННЫХ: Неверная длина ' + (i+1).ToString() + '-го поля. В нём должно находиться ровно ' + lengths[i].ToString() + ' символов, включая пробелы, а на ' + lengths_sum.ToString() + '-й позиции строки должен находиться ТОЛЬКО разделитель "|".');
     end;
     
     // Проверка на выравнивание по левому краю

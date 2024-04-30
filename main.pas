@@ -54,12 +54,12 @@ begin
     file_record_count := file_record_count + 1;
     err_string := err_string + validateOrderString(line);
     if err_string <> '' then begin
-      writeln('Ошибки в ' + order_in_filename + ' на ' + file_record_count.ToString() + ' строке:' + err_string);
+      writeln('Ошибки в ' + orders_in_filename + ' на ' + file_record_count.ToString() + ' строке:' + err_string);
     end else begin
       ord := makeOrderObjectFromString(line);
-      err_string := validateOrderObject(prod, l_prod);
+      err_string := validateOrderObject(ord, l_ord, l_prod);
       if err_string <> '' then begin
-        writeln('Ошибки в ' + order_in_filename + ' на ' + file_record_count.ToString() + ' строке:' + err_string);
+        writeln('Ошибки в ' + orders_in_filename + ' на ' + file_record_count.ToString() + ' строке:' + err_string);
       end else begin
         l_ord[list_record_count] := ord;
         writeln(l_ord[list_record_count]);
@@ -78,12 +78,12 @@ begin
     file_record_count := file_record_count + 1;
     err_string := err_string + validateShipmentString(line);
     if err_string <> '' then begin
-      writeln('Ошибки в ' + shipment_in_filename + ' на ' + file_record_count.ToString() + ' строке:' + err_string);
+      writeln('Ошибки в ' + shipments_in_filename + ' на ' + file_record_count.ToString() + ' строке:' + err_string);
     end else begin
       ship := makeShipmentObjectFromString(line);
-      err_string := validateShipmentObject(prod, l_prod);
+      err_string := validateShipmentObject(ship, l_ord, l_prod);
       if err_string <> '' then begin
-        writeln('Ошибки в ' + shipment_in_filename + ' на ' + file_record_count.ToString() + ' строке:' + err_string);
+        writeln('Ошибки в ' + shipments_in_filename + ' на ' + file_record_count.ToString() + ' строке:' + err_string);
       end else begin
         l_ship[list_record_count] := ship;
         writeln(l_ship[list_record_count]);
