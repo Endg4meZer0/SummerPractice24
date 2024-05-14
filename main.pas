@@ -2,9 +2,6 @@
 
 
 // TODO!!!: выходной файлик по условию
-// TODO: сравнение дат отгрузок и дат поступлений заказа
-// TODO: сравнение товаров в заказе и в отгрузке
-// TODO?: привязка имени заказчика к его номеру телефона
 
 uses consts;
 uses products;
@@ -16,7 +13,7 @@ const orders_in_filename = 'orders.txt';
 const shipments_in_filename = 'shipments.txt';
 
 var err_string, line: string;
-var file_record_count, list_record_count: integer;
+var file_record_count: integer;
 var f_prod, f_ord, f_ship: text;
 var l_prod: list_prod; l_ord: list_ord; l_ship: list_ship;
 var prod: product; ord: order; ship: shipment;
@@ -29,8 +26,8 @@ begin
   reset(f_ship);
   
   file_record_count := 0;
-  list_record_count := 1;
-  while (not eof(f_prod)) and (list_record_count <= possible_records) do begin
+  l_prod.Count := 0;
+  while (not eof(f_prod)) and (l_prod.Count <= possible_records) do begin
     err_string := '';
     readln(f_prod, line);
     file_record_count := file_record_count + 1;
@@ -43,18 +40,18 @@ begin
       if err_string <> '' then begin
         writeln('Ошибки в ' + products_in_filename + ' на ' + file_record_count.ToString() + ' строке:' + err_string);
       end else begin
-        l_prod[list_record_count] := prod;
-        writeln(l_prod[list_record_count]);
-        list_record_count := list_record_count + 1;
+        l_prod.Count := l_prod.Count + 1;
+        l_prod.List[l_prod.Count] := prod;
+        writeln(l_prod.List[l_prod.Count]);
       end;
     end;
   end;
-  if not eof(f_prod) and (list_record_count > possible_records) then writeln('Слишком много записей о товарах. Зарегистрировано максимальное доступное количество (' + possible_records.ToString() + ').');
+  if not eof(f_prod) and (l_prod.Count > possible_records) then writeln('Слишком много записей о товарах. Зарегистрировано максимальное доступное количество (' + possible_records.ToString() + ').');
   close(f_prod);
   
   file_record_count := 0;
-  list_record_count := 1;
-  while (not eof(f_ord)) and (list_record_count <= possible_records) do begin
+  l_ord.Count := 0;
+  while (not eof(f_ord)) and (l_ord.Count <= possible_records) do begin
     err_string := '';
     readln(f_ord, line);
     file_record_count := file_record_count + 1;
@@ -67,18 +64,18 @@ begin
       if err_string <> '' then begin
         writeln('Ошибки в ' + orders_in_filename + ' на ' + file_record_count.ToString() + ' строке:' + err_string);
       end else begin
-        l_ord[list_record_count] := ord;
-        writeln(l_ord[list_record_count]);
-        list_record_count := list_record_count + 1;
+        l_ord.Count := l_ord.Count + 1;
+        l_ord.List[l_ord.Count] := ord;
+        writeln(l_ord.List[l_ord.Count]);
       end;
     end;
   end;
-  if not eof(f_ord) and (list_record_count > possible_records) then writeln('Слишком много записей о заказах. Зарегистрировано максимальное доступное количество (' + possible_records.ToString() + ').');
+  if not eof(f_ord) and (l_ord.Count > possible_records) then writeln('Слишком много записей о заказах. Зарегистрировано максимальное доступное количество (' + possible_records.ToString() + ').');
   close(f_ord);
   
   file_record_count := 0;
-  list_record_count := 1;
-  while (not eof(f_ship)) and (list_record_count <= possible_records) do begin
+  l_ship.Count := 1;
+  while (not eof(f_ship)) and (l_ship.Count <= possible_records) do begin
     err_string := '';
     readln(f_ship, line);
     file_record_count := file_record_count + 1;
@@ -91,12 +88,12 @@ begin
       if err_string <> '' then begin
         writeln('Ошибки в ' + shipments_in_filename + ' на ' + file_record_count.ToString() + ' строке:' + err_string);
       end else begin
-        l_ship[list_record_count] := ship;
-        writeln(l_ship[list_record_count]);
-        list_record_count := list_record_count + 1;
+        l_ship.List[l_ship.Count] := ship;
+        writeln(l_ship.List[l_ship.Count]);
+        l_ship.Count := l_ship.Count + 1;
       end;
     end;
   end;
-  if not eof(f_ship) and (list_record_count > possible_records) then writeln('Слишком много записей о поставках. Зарегистрировано максимальное доступное количество (' + possible_records.ToString() + ').');
+  if not eof(f_ship) and (l_ship.Count > possible_records) then writeln('Слишком много записей о поставках. Зарегистрировано максимальное доступное количество (' + possible_records.ToString() + ').');
   close(f_ship);
 end.

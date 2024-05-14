@@ -10,7 +10,11 @@ type product = record
   name: string;
   cost: real;
 end;
-list_prod = array[1..possible_records] of product;
+
+list_prod = record
+  List: array[1..possible_records] of product;
+  Count: integer;
+end;
 
 function makeProductObjectFromString(s: string): product;
 function validateProductString(s: string): string;
@@ -86,8 +90,8 @@ var i: integer;
 var err_string: string;
 begin
   err_string := '';
-  for i := 1 to possible_records do begin
-    if pl[i].code = p.code then append_err(err_string, 'КОД ТОВАРА: Произошёл конфликт в виде повтора кода товара с кодом другого уже зарегистрированного товара.');
+  for i := 1 to pl.Count do begin
+    if pl.List[i].code = p.code then append_err(err_string, 'КОД ТОВАРА: Произошёл конфликт в виде повтора кода товара с кодом другого уже зарегистрированного товара.');
   end;
   
   Result := err_string;

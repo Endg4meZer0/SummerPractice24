@@ -19,7 +19,10 @@ type shipment = record
     amount: integer;
   end;
 end;
-list_ship = array[1..possible_records] of shipment;
+list_ship = record
+  List: array[1..possible_records] of shipment;
+  Count: integer;
+end;
 
 function makeShipmentObjectFromString(s: string): shipment;
 function validateShipmentString(s: string): string;
@@ -117,7 +120,7 @@ begin
     
     // Проверка на отсутствие лишних символов в коде заказа
     val(t_s, t_i, t_err);
-    if (t_err <> 0) or (t_i > 99999999) or (t_s[1] = '+') or (t_s[1] = '-') then append_err(err_string, 'Код заказа должен состоять ТОЛЬКО максимум из 8 цифр, не должно быть букв и других символов.');
+    if (t_err <> 0) or (t_i > 99999999) or (t_s[1] = '+') or (t_s[1] = '-') then append_err(err_string, 'КОД ЗАКАЗА: Код заказа должен состоять ТОЛЬКО максимум из 8 цифр, не должно быть букв и других символов.');
     
     // -------- СПИСОК ТОВАРОВ --------
     i := 0;
@@ -130,11 +133,11 @@ begin
         t_err_string := '';
         
         // Проверка на начало кода НЕ с нуля
-        if t_s[1] = '0' then append_err(t_err_string, 'ТОВАР ' + i.ToString() + ': Код товара не может начинаться с 0.');
+        if t_s[1] = '0' then append_err(t_err_string, 'ТОВАР №' + i.ToString() + ': Код товара не может начинаться с 0.');
         
         // Проверка на отсутствие лишних символов в коде товара
         val(t_s, t_i, t_err);
-        if (t_err <> 0) or (t_i > 99999999) or (t_s[1] = '+') or (t_s[1] = '-') then append_err(t_err_string, '(Товар ' + i.ToString() + ') Код товара должен состоять ТОЛЬКО максимум из 8 цифр, не должно быть букв и других символов.');
+        if (t_err <> 0) or (t_i > 99999999) or (t_s[1] = '+') or (t_s[1] = '-') then append_err(t_err_string, 'ТОВАР №' + i.ToString() + ': Код товара должен состоять ТОЛЬКО максимум из 8 цифр, не должно быть букв и других символов.');
         
         if t_err_string <> '' then err_string := err_string + t_err_string;
         t_flag := true;
@@ -143,11 +146,11 @@ begin
         t_err_string := '';
         
         // Проверка на начало кол-ва НЕ с нуля
-        if t_s[1] = '0' then append_err(t_err_string, 'ТОВАР ' + i.ToString() + ': Кол-во товара не может начинаться с 0.');
+        if t_s[1] = '0' then append_err(t_err_string, 'ТОВАР №' + i.ToString() + ': Кол-во товара не может начинаться с 0.');
         
         // Проверка на отсутствие лишних символов в кол-ве товара
         val(t_s, t_i, t_err);
-        if (t_err <> 0) or (t_s[1] = '+') or (t_s[1] = '-') then append_err(t_err_string, 'ТОВАР ' + i.ToString() + ': Кол-во товара должен состоять ТОЛЬКО из цифр, не должно быть букв и других символов.');
+        if (t_err <> 0) or (t_s[1] = '+') or (t_s[1] = '-') then append_err(t_err_string, 'ТОВАР №' + i.ToString() + ': Кол-во товара должен состоять ТОЛЬКО из цифр, не должно быть букв и других символов.');
         
         if t_err_string <> '' then err_string := err_string + t_err_string;
         t_flag := false;
@@ -161,25 +164,31 @@ function validateShipmentObject(s: shipment; ol: list_ord; pl: list_prod): strin
 var i, j: integer;
 var flag: boolean;
 var err_string: string;
+var ord: order;
 begin
+  ord.code := -1;
   err_string := '';
-  for i := 1 to possible_records do begin
-    if s.order_code <> 0 then begin
-      flag := false;
-      for j := 1 to possible_records do begin
-        if ol[j].code = s.order_code then flag := true;
-      end;
-      if not flag then append_err(err_string, 'КОД ЗАКАЗА: Код заказа не соответствует ни одному из зарегистрированных заказов.');
+  i := 1;
+  while (i <= ol.Count) and not flag do begin
+    if ol.List[i].code = s.order_code then begin
+      ord := ol.List[i];
+      if (ord.date.year > s.date.year) or (ord.date.month > s.date.month) or (ord.date.day > s.date.day) then
+        append_err(err_string, 'ДАТА: Дата отгрузки товаров по заказу не может быть установлена раньше, чем дата поступления самого заказа.');
     end;
+    i := i + 1;
   end;
-  for i := 1 to max_products do begin
-    if s.prod_list[i].code <> 0 then begin
-      flag := false;
-      for j := 1 to possible_records do begin
-        if pl[j].code = s.prod_list[i].code then flag := true;
-      end;
-      if not flag then append_err(err_string, 'ТОВАР ' + i.ToString() + ': Код товара не соответствует ни одному из зарегистрированных товаров.');
+  if ord.code = -1 then append_err(err_string, 'КОД ЗАКАЗА: Код заказа не соответствует ни одному из зарегистрированных заказов.');
+  i := 1;
+  while (i <= max_products) and (s.prod_list[i].code <> 0) do begin
+    flag := false;
+    j := 1;
+    while not flag and (j <= pl.Count) do begin
+      if pl.List[j].code = s.prod_list[i].code then flag := true;
+      j := j + 1;
     end;
+    if not flag then append_err(err_string, 'ТОВАР №' + i.ToString() + ': Код товара не соответствует ни одному из зарегистрированных товаров.')
+    else if s.prod_list[i].code <> ord.prod_list[i].Code then append_err(err_string, 'ТОВАР №' + i.ToString() + ': Код товара не соответствует списку товаров заказа.');
+    i := i + 1;
   end;
   Result := err_string;
 end;
