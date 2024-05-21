@@ -3,17 +3,17 @@
 
 // TODO!!!: выходной файлик по условию
 
-uses consts;
-uses products;
-uses orders;
-uses shipments;
+uses consts; // модуль констант, общих для всей программы
+uses products, orders, shipments; // модули работы с отдельными входными файлами
+uses sort; // модуль сортировки
+uses output; // модуль вывода ведомости
 
 const products_in_filename = 'products.txt';
 const orders_in_filename = 'orders.txt';
 const shipments_in_filename = 'shipments.txt';
 
 var err_string, line: string;
-var file_record_count: integer;
+var file_record_count, sheetYear: integer;
 var f_prod, f_ord, f_ship: text;
 var l_prod: list_prod; l_ord: list_ord; l_ship: list_ship;
 var prod: product; ord: order; ship: shipment;
@@ -96,4 +96,12 @@ begin
   end;
   if not eof(f_ship) and (l_ship.Count > possible_records) then writeln('Слишком много записей о поставках. Зарегистрировано максимальное доступное количество (' + possible_records.ToString() + ').');
   close(f_ship);
+  
+  quickSort(l_prod, 1, l_prod.Count);
+  quickSort(l_ord, 1, l_ord.Count);
+  
+  write('Введите год для создания ведомости: ');
+  readln(sheetYear);
+  
+  printSheet(l_prod, l_ord, l_ship, sheetYear);
 end.
