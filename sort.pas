@@ -7,6 +7,7 @@ uses consts;
 procedure quickSort(var lp: list_prod; low: integer; high: integer);
 procedure quickSort(var lo: list_ord; low: integer; high: integer);
 function stringCompare(s1, s2: string): integer;
+//procedure filterByYear(var lp: list_prod; var lo: list_ord; year: integer);
 
 implementation
 
@@ -100,5 +101,34 @@ begin
     end;
   end;
 end;
+//
+//procedure filterByYear(var lp: list_prod; var lo: list_ord; year: integer);
+//var new_lp: list_prod;
+//    new_lo: list_ord;
+//    i,j,k: integer;
+//    alreadyExists: boolean;
+//begin
+//  new_lp.Count := 0; new_lo.Count := 0;
+//  for i := 1 to lo.Count do begin
+//    if lo.List[i].date.Year = year then begin
+//      j := 1;
+//      while (j <= max_records) and not (lo.List[i].prod_list[j].Code = 0) do begin
+//        for k := 1 to lp.Count do begin
+//          
+//        end;
+//        alreadyExists := false; k := 1;
+//        while (k <= new_lp.Count) and not alreadyExists do begin
+//          if new_lp.List[k].code = lo.List[i].prod_list[j].Code then alreadyExists := true;
+//          k := k + 1;
+//        end;
+//        if not alreadyExists then begin
+//          new_lp.Count := new_lp.Count + 1;
+//          new_lp.List[new_lp.Count] := 
+//        end;
+//        j := j + 1;
+//      end;
+//    end;
+//  end;
+//end;
 
 end.

@@ -14,7 +14,7 @@ const shipments_in_filename = 'shipments.txt';
 
 var err_string, line: string;
 var file_record_count, sheetYear: integer;
-var f_prod, f_ord, f_ship: text;
+var f_prod, f_ord, f_ship, f_out: text;
 var l_prod: list_prod; l_ord: list_ord; l_ship: list_ship;
 var prod: product; ord: order; ship: shipment;
 begin
@@ -42,7 +42,7 @@ begin
       end else begin
         l_prod.Count := l_prod.Count + 1;
         l_prod.List[l_prod.Count] := prod;
-        writeln(l_prod.List[l_prod.Count]);
+        //writeln(l_prod.List[l_prod.Count]);
       end;
     end;
   end;
@@ -66,7 +66,7 @@ begin
       end else begin
         l_ord.Count := l_ord.Count + 1;
         l_ord.List[l_ord.Count] := ord;
-        writeln(l_ord.List[l_ord.Count]);
+        //writeln(l_ord.List[l_ord.Count]);
       end;
     end;
   end;
@@ -74,7 +74,7 @@ begin
   close(f_ord);
   
   file_record_count := 0;
-  l_ship.Count := 1;
+  l_ship.Count := 0;
   while (not eof(f_ship)) and (l_ship.Count <= possible_records) do begin
     err_string := '';
     readln(f_ship, line);
@@ -88,9 +88,9 @@ begin
       if err_string <> '' then begin
         writeln('Ошибки в ' + shipments_in_filename + ' на ' + file_record_count.ToString() + ' строке:' + err_string);
       end else begin
-        l_ship.List[l_ship.Count] := ship;
-        writeln(l_ship.List[l_ship.Count]);
         l_ship.Count := l_ship.Count + 1;
+        l_ship.List[l_ship.Count] := ship;
+        //writeln(l_ship.List[l_ship.Count]);
       end;
     end;
   end;
@@ -103,5 +103,10 @@ begin
   write('Введите год для создания ведомости: ');
   readln(sheetYear);
   
-  printSheet(l_prod, l_ord, l_ship, sheetYear);
+  assign(f_out, 'sheet_' + sheetYear.ToString() + '.txt');
+  rewrite(f_out);
+  
+  printSheet(l_prod, l_ord, l_ship, sheetYear, f_out);
+  
+  close(f_out);
 end.
