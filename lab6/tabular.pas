@@ -4,7 +4,7 @@ interface
 uses errors;
 
 function get_next(var s: string; char_count: integer): string;
-function validate(s: string; var lengths: array of integer): string;
+function validate(s: string; var lengths: array of integer; minimum_lengths: integer): string;
 
 implementation
 
@@ -19,7 +19,7 @@ begin
   s := copy(s, char_count + 2, s.Length - (char_count + 2));
 end;
 
-function validate(s: string; var lengths: array of integer): string;
+function validate(s: string; var lengths: array of integer; minimum_lengths: integer): string;
 var i, j, lengths_sum: integer;
 var err_string: string;
 var err_flag, err_flag2: boolean;

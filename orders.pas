@@ -2,7 +2,7 @@
 interface
 
 uses errors;
-uses space_one;
+uses space_many;
 uses consts;
 uses products;
 

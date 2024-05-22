@@ -2,7 +2,7 @@
 interface
 
 uses errors;
-uses space_many;
+uses tabular;
 uses consts;
 uses products;
 uses orders;
@@ -33,15 +33,15 @@ implementation
 function makeShipmentObjectFromString(s: string): shipment;
 var i, err: integer;
 begin
-  val(get_next(s), Result.date.day, err);
-  Result.date.month := months.IndexOf(get_next(s)) + 1;
-  val(get_next(s), Result.date.year, err);
-  val(get_next(s), Result.order_code, err);
+  val(get_next(s,2), Result.date.day, err);
+  Result.date.month := months.IndexOf(get_next(s,9)) + 1;
+  val(get_next(s,4), Result.date.year, err);
+  val(get_next(s,8), Result.order_code, err);
   
   i := 1;
   while (i <= max_products) and (s <> '') do begin
-    val(get_next(s), Result.prod_list[i].code, err);
-    val(get_next(s), Result.prod_list[i].amount, err);
+    val(get_next(s,8), Result.prod_list[i].code, err);
+    val(get_next(s,8), Result.prod_list[i].amount, err);
     i := i + 1;
   end;
 end;
@@ -57,13 +57,18 @@ var t_date: record
   month: integer;
   year: integer;
 end;
+var tab_lengths: array of integer = (2, 9, 4, 8);
+var tab_lengths_prods: array of integer = (8, 8);
 begin
-  err_string := validate(s, max_products * 2 + 4);
+  for i := 1 to max_products do begin
+    tab_lengths := tab_lengths + tab_lengths_prods;
+  end;
+  err_string := validate(s, tab_lengths, 6);
   
   // Проверка на соблюдение заданного формата данных.
   if err_string = '' then begin
     // -------- ДАТА (ДЕНЬ) --------
-    t_s := get_next(s);
+    t_s := get_next(s, 2);
     t_flag := true; // Флаг правильности даты
     val(t_s, t_date.day, t_err);
     
@@ -79,7 +84,7 @@ begin
     end;
     
     // -------- ДАТА (МЕСЯЦ) --------
-    t_s := get_next(s);
+    t_s := get_next(s, 9);
     
     // Проверка, что задан верный месяц
     if not months.Contains(t_s) then begin 
@@ -97,7 +102,7 @@ begin
     end;
     
     // -------- ДАТА (ГОД) --------
-    t_s := get_next(s);
+    t_s := get_next(s, 4);
     
     // Проверка, что нет лишних символов
     val(t_s, t_date.year, t_err);
@@ -113,7 +118,7 @@ begin
     end;
     
     // -------- КОД ЗАКАЗА --------
-    t_s := get_next(s);
+    t_s := get_next(s, 8);
     
     // Проверка на начало кода заказа (не должно быть нуля в начале)
     if t_s[1] = '0' then append_err(err_string, 'КОД ЗАКАЗА: Код заказа не может начинаться с 0.');
@@ -126,7 +131,7 @@ begin
     i := 0;
     t_flag := false; // флаг товара (если найден ВОЗМОЖНЫЙ код товара, то true и ждем кол-во товара, затем снова ставим false)
     while (s <> '') do begin
-      t_s := get_next(s);
+      t_s := get_next(s,8);
       
       if t_flag = false then begin
         i := i + 1;

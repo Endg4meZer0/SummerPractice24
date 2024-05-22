@@ -26,18 +26,21 @@ var err_string: string;
 begin
   err_string := '';
   
-  if s[1] = ' ' then append_err(err_string, 'ФОРМАТ ДАННЫХ: Строка не должна начинаться с пробела.');
-  if s[s.Length] = ' ' then append_err(err_string, 'ФОРМАТ ДАННЫХ: Строка не должна оканчиваться на пробел.');
-  
-  count := 1;
-  for i := 1 to s.Length do begin
-    if (s[i] = ' ') then begin
-      count := count + 1;
+  if s.Length = 0 then append_err(err_string, 'ФОРМАТ ДАННЫХ: Обнаружена пустая строка.')
+  else begin
+    if s[1] = ' ' then append_err(err_string, 'ФОРМАТ ДАННЫХ: Строка не должна начинаться с пробела.');
+    if s[s.Length] = ' ' then append_err(err_string, 'ФОРМАТ ДАННЫХ: Строка не должна оканчиваться на пробел.');
+    
+    count := 1;
+    for i := 1 to s.Length do begin
+      if (s[i] = ' ') then begin
+        count := count + 1;
+      end;
     end;
+    if (count > max_elements_count) then append_err(err_string, 'ФОРМАТ ДАННЫХ: Слишком много данных. Максимальное кол-во полей: ' + max_elements_count.ToString() + '.')
+    else if (count < 3) then append_err(err_string, 'ФОРМАТ ДАННЫХ: Слишком мало данных. Необходимо 3 обязательных поля (код товара, наименование товара и цена товара).');
+    // else if (count mod 2 = 1) then append_err(err_string, 'ФОРМАТ ДАННЫХ: Неверное количество данных. Товары имеют по два поля: код и кол-во. У последнего товара указан только код.');
   end;
-  if (count > max_elements_count) then append_err(err_string, 'ФОРМАТ ДАННЫХ: Слишком много данных. Максимальное количество товаров: ' + ((max_elements_count - 6) / 2).ToString() + ', максимальное кол-во полей в общем: ' + max_elements_count.ToString() + '.')
-  else if (count < 6) then append_err(err_string, 'ФОРМАТ ДАННЫХ: Слишком мало данных. Необходимо 6 обязательных полей (код заказа, наименование заказчика, номер телефона, день, месяц и год заказа), а также хотя бы один товар (два поля: код и кол-во).')
-  else if (count mod 2 = 1) then append_err(err_string, 'ФОРМАТ ДАННЫХ: Неверное количество данных. Товары имеют по два поля: код и кол-во. У последнего товара указан только код.');
   Result := err_string;
 end;
 
