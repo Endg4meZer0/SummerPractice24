@@ -39,7 +39,7 @@ begin
         space_flag := true;
         count := count + 1;
       end
-      else space_flag := false;
+      else if (s[i] <> ' ') then space_flag := false;
     end;
     if (count > max_elements_count) then append_err(err_string, 'ФОРМАТ ДАННЫХ: Слишком много данных. Максимальное количество товаров: ' + ((max_elements_count - 4) / 2).ToString() + ', максимальное кол-во полей в общем: ' + max_elements_count.ToString() + '.')
     else if (count < 6) then append_err(err_string, 'ФОРМАТ ДАННЫХ: Слишком мало данных. Необходимо 4 обязательных поля (день, месяц и год отгрузки и код заказа), а также хотя бы один товар (два поля: код и кол-во).')
