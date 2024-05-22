@@ -9,14 +9,14 @@ uses orders;
 
 type shipment = record
   date: record // Дата ОТГРУЗКИ
-    day: integer;
-    month: integer;
-    year: integer;
+    Day: integer;
+    Month: integer;
+    Year: integer;
   end;
   order_code: integer;
   prod_list: array[1..max_products] of record
-    code: integer;
-    amount: integer;
+    Code: integer;
+    Amount: integer;
   end;
 end;
 list_ship = record
