@@ -22,7 +22,7 @@ begin
   assign(f_ord, orders_in_filename);
   assign(f_ship, shipments_in_filename);
   reset(f_prod); 
-  reset(f_ord); 
+  reset(f_ord);
   reset(f_ship);
   
   file_record_count := 0;
