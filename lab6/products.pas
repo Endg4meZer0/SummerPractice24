@@ -2,7 +2,7 @@
 interface
 
 uses errors;
-uses tabular;
+uses space_one;
 uses consts;
 
 type product = record
@@ -25,9 +25,9 @@ implementation
 function makeProductObjectFromString(s: string): product;
 var err: integer;
 begin
-  val(get_next(s,8), Result.code, err);
-  Result.name := get_next(s,32);
-  val(get_next(s,10), Result.cost, err);
+  val(get_next(s), Result.code, err);
+  Result.name := get_next(s);
+  val(get_next(s), Result.cost, err);
 end;
 
 function validateProductString(s: string): string;
@@ -36,14 +36,14 @@ var t_s: string;
 var t_i: integer;
 var t_r: real;
 var t_err: integer;
-var tab_lengths: array of integer = (8, 32, 10);
+// var tab_lengths: array of integer = (8, 32, 10);
 begin
-  err_string := validate(s, tab_lengths);
+  err_string := validate(s, 3);
   
   // Проверка на соблюдение заданного формата данных.
   if err_string = '' then begin
     // -------- КОД ТОВАРА --------
-    t_s := get_next(s, tab_lengths[0]);
+    t_s := get_next(s);
     
     // Проверка на начало кода НЕ с нуля
     if t_s[1] = '0' then append_err(err_string, 'КОД ТОВАРА: Код товара не может начинаться с 0.');
@@ -53,7 +53,7 @@ begin
     if (t_err <> 0) or (t_i > 99999999) or (t_s[1] = '+') or (t_s[1] = '-') then append_err(err_string, 'КОД ТОВАРА: Код товара должен состоять ТОЛЬКО максимум из 8 цифр, не должно быть букв и других символов вроде "+", "-" и т.п.');
     
     // -------- НАИМЕНОВАНИЕ ТОВАРА --------
-    t_s := get_next(s, tab_lengths[1]);
+    t_s := get_next(s);
     
     // Проверка на начало имени НЕ на _
     if t_s[1] = '_' then append_err(err_string, 'НАИМЕНОВАНИЕ ТОВАРА: Наименование товара не может начинаться с нижнего подчеркивания.');
@@ -65,7 +65,7 @@ begin
     if pos(' ', t_s) <> 0 then append_err(err_string, 'НАИМЕНОВАНИЕ ТОВАРА: Внутри наименования товара не должно быть пробелов. В качестве разделителя используйте нижнее подчёркивание.');
     
     // -------- СТОИМОСТЬ ТОВАРА --------
-    t_s := get_next(s, tab_lengths[2]);
+    t_s := get_next(s);
     
     // Проверка на начало стоимости на 0
     if (t_s[1] = '0') then append_err(err_string, 'СТОИМОСТЬ ТОВАРА: Стоимость товара не может начинаться с 0.');

@@ -37,8 +37,8 @@ begin
         count := count + 1;
       end;
     end;
-    if (count > max_elements_count) then append_err(err_string, 'ФОРМАТ ДАННЫХ: Слишком много данных. Максимальное кол-во полей: ' + max_elements_count.ToString() + ' (код товара, наименование товара и цена товара).')
-    else if (count < 3) then append_err(err_string, 'ФОРМАТ ДАННЫХ: Слишком мало данных. Необходимо 3 поля (код товара, наименование товара и цена товара).');
+    if (count > max_elements_count) then append_err(err_string, 'ФОРМАТ ДАННЫХ: Слишком много данных. Максимальное кол-во полей: ' + max_elements_count.ToString() + '.')
+    else if (count < 3) then append_err(err_string, 'ФОРМАТ ДАННЫХ: Слишком мало данных. Необходимо 3 обязательных поля (код товара, наименование товара и цена товара).');
     // else if (count mod 2 = 1) then append_err(err_string, 'ФОРМАТ ДАННЫХ: Неверное количество данных. Товары имеют по два поля: код и кол-во. У последнего товара указан только код.');
   end;
   Result := err_string;

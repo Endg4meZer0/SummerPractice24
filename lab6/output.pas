@@ -26,15 +26,12 @@ var i: integer;
 begin
   res := prod.code.ToString();
   result := res;
-  for i := 1 to 8 - res.Length do result := result + ' ';
-  result := result + '|'; // разделитель табличный
+  result := result + ' '; // разделитель в формате с одним пробелом
   res := prod.name;
   result := result + res;
-  for i := 1 to 32 - res.Length do result := result + ' ';
-  result := result + '|';
+  result := result + ' ';
   res := prod.cost.ToString();
   result := result + res;
-  for i := 1 to 10 - res.Length do result := result + ' ';
 end;
 
 
