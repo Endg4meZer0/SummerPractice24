@@ -96,7 +96,7 @@ begin
       t_date.month := months.IndexOf(t_s);
       if t_flag then begin
         // Проверка, является ли последний день чётного месяца 30-м
-        if (t_date.month in (4, 6, 9, 11)) and (t_date.month <> 2) and (t_date.day > 30) then append_err(err_string, 'ДАТА (МЕСЯЦ): Апрель, июнь, сентябрь и ноябрь имеют всего 30 дней.');
+        if (t_date.month in ([4, 6, 9, 11])) and (t_date.month <> 2) and (t_date.day > 30) then append_err(err_string, 'ДАТА (МЕСЯЦ): Апрель, июнь, сентябрь и ноябрь имеют всего 30 дней.');
         // Проверка, является ли месяц февралём и день меньшим, чем 30
         if (t_date.month = 2) and (t_date.day > 29) then append_err(err_string, 'ДАТА (МЕСЯЦ): В феврале не может быть больше 29 дней.');
       end;
