@@ -33,7 +33,7 @@ begin
     if s[1] = ' ' then append_err(err_string, 'ФОРМАТ ДАННЫХ: Строка не должна начинаться с пробела.');
     if s[s.Length] = ' ' then append_err(err_string, 'ФОРМАТ ДАННЫХ: Строка не должна оканчиваться на пробел.');
     
-    count := 0;
+    count := 1;
     for i := 1 to s.Length do begin
       if (s[i] = ' ') and not space_flag then begin
         space_flag := true;
