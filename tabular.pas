@@ -59,7 +59,7 @@ begin
         lengths_sum := lengths_sum + lengths[i] + 1;
       end;
     end;
-  end
+  end;
   
   Result := err_string;
 end;
