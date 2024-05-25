@@ -187,7 +187,7 @@ begin
       j := j + 1;
     end;
     if not flag then append_err(err_string, 'ТОВАР №' + i.ToString() + ': Код товара не соответствует ни одному из зарегистрированных товаров.')
-    else if s.prod_list[i].code <> ord.prod_list[i].Code then append_err(err_string, 'ТОВАР №' + i.ToString() + ': Код товара не соответствует списку товаров заказа.');
+    else if (ord.code <> -1) and (s.prod_list[i].code <> ord.prod_list[i].Code) then append_err(err_string, 'ТОВАР №' + i.ToString() + ': Код товара не соответствует списку товаров заказа.');
     i := i + 1;
   end;
   Result := err_string;
