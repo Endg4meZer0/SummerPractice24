@@ -7,16 +7,17 @@ uses consts;
 uses products;
 uses orders;
 
+type shipped_prod = record
+  Code: integer;
+  Amount: integer;
+end;
+
 type shipment = record
-  date: record // Дата ОТГРУЗКИ
-    Day: integer;
-    Month: integer;
-    Year: integer;
-  end;
+  date: consts.Date; // Дата ОТГРУЗКИ
   order_code: integer;
-  prod_list: array[1..max_products] of record
-    Code: integer;
-    Amount: integer;
+  prod_list: record
+    List: array[1..max_products] of shipped_prod;
+    Count: integer;
   end;
 end;
 list_ship = record
@@ -32,16 +33,19 @@ implementation
 
 function makeShipmentObjectFromString(s: string): shipment;
 var i, err: integer;
+var _d, _m, _y: integer;
 begin
-  val(get_next(s,2), Result.date.day, err);
-  Result.date.month := months.IndexOf(get_next(s,9)) + 1;
-  val(get_next(s,4), Result.date.year, err);
+  val(get_next(s), _d, err);
+  _m := months.IndexOf(get_next(s)) + 1;
+  val(get_next(s), _y, err);
+  Result.date := Date.create(_d, _m, _y);
   val(get_next(s,8), Result.order_code, err);
   
   i := 1;
   while (i <= max_products) and (s <> '') do begin
-    val(get_next(s,8), Result.prod_list[i].code, err);
-    val(get_next(s,8), Result.prod_list[i].amount, err);
+    val(get_next(s), Result.prod_list.list[i].code, err);
+    val(get_next(s), Result.prod_list.list[i].amount, err);
+    Result.prod_list.count := i;
     i := i + 1;
   end;
 end;
@@ -167,33 +171,52 @@ end;
 
 function validateShipmentObject(s: shipment; ol: list_ord; pl: list_prod): string;
 var i, j: integer;
-var flag: boolean;
+var flag, allow_check: boolean;
 var err_string: string;
-var ord: order;
+var o: order;
 begin
-  ord.code := -1;
+  o.code := -1;
   err_string := '';
+  allow_check := true;
+
+  // ДАТА
   i := 1;
   while (i <= ol.Count) and not flag do begin
     if ol.List[i].code = s.order_code then begin
-      ord := ol.List[i];
-      if (ord.date.year > s.date.year) or (ord.date.month > s.date.month) or (ord.date.day > s.date.day) then
-        append_err(err_string, 'ДАТА: Дата отгрузки товаров по заказу не может быть установлена раньше, чем дата поступления самого заказа.');
+      o := ol.List[i];
+      if s.date.compare(o.date) = -1
+        then append_err(err_string, 'ДАТА: Дата отгрузки товаров по заказу не может быть установлена раньше, чем дата поступления самого заказа.');
     end;
     i := i + 1;
   end;
-  if ord.code = -1 then append_err(err_string, 'КОД ЗАКАЗА: Код заказа не соответствует ни одному из зарегистрированных заказов.');
-  i := 1;
-  while (i <= max_products) and (s.prod_list[i].code <> 0) do begin
-    flag := false;
-    j := 1;
-    while not flag and (j <= pl.Count) do begin
-      if pl.List[j].code = s.prod_list[i].code then flag := true;
-      j := j + 1;
+
+  // СУЩЕСТВОВАНИЕ ЗАКАЗА ПО КОДУ
+  if o.code = -1 then append_err(err_string, 'КОД ЗАКАЗА: Код заказа не соответствует ни одному из зарегистрированных заказов.');
+
+    // СПИСОК ТОВАРОВ
+  j := 0;
+  for i := 1 to s.prod_list.count do begin
+    // ОТСОРТИРОВАННОСТЬ СПИСКА ТОВАРОВ
+    if j <> 0 then
+      if s.prod_list.list[i].code < j then begin 
+        if o.prod_list.List[i].code = j then append_err(err_string, 'СПИСОК ТОВАРОВ: Обнаружено два одинаковых кода товара в списке.')
+        else append_err(err_string, 'СПИСОК ТОВАРОВ: Список не отсортирован по кодам товаров.'); 
+        allow_check := false; 
+      end;
+
+    // СУЩЕСТВОВАНИЕ ТОВАРОВ ИЗ СПИСКА
+    if allow_check then begin
+      flag := false;
+      j := 1;
+      while not flag and (j <= pl.Count) do begin
+        if pl.List[j].code = s.prod_list.list[i].code then flag := true;
+        j := j + 1;
+      end;
+      if not flag then append_err(err_string, 'ТОВАР №' + i.ToString() + ': Код товара не соответствует ни одному из зарегистрированных товаров.')
+      // СООТВЕТСТВИЕ СПИСКА ТОВАРОВ ОТГРУЗКИ СПИСКУ ТОВАРОВ ЗАКАЗА
+      else if (o.code <> -1) and (s.prod_list.list[i].code <> o.prod_list.list[i].Code) then append_err(err_string, 'ТОВАР №' + i.ToString() + ': Код товара не соответствует списку товаров заказа.');
     end;
-    if not flag then append_err(err_string, 'ТОВАР №' + i.ToString() + ': Код товара не соответствует ни одному из зарегистрированных товаров.')
-    else if s.prod_list[i].code <> ord.prod_list[i].Code then append_err(err_string, 'ТОВАР №' + i.ToString() + ': Код товара не соответствует списку товаров заказа.');
-    i := i + 1;
+    j := s.prod_list.list[i].code;
   end;
   Result := err_string;
 end;

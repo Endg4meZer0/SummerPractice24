@@ -20,7 +20,7 @@ begin
 
   file_record_count := 0;
   l_prod.Count := 0;
-  while (not eof(f_prod)) and (l_prod.Count <= possible_records) do begin
+  while (not eof(f_prod)) and (l_prod.Count < possible_records) do begin
     err_string := '';
     readln(f_prod, line);
     file_record_count := file_record_count + 1;

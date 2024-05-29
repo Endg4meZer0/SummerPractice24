@@ -6,3 +6,4 @@ sheet_*.txt
 
 *.exe
 *.exe.mdb
+*.pdb
