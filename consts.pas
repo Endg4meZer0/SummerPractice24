@@ -50,7 +50,7 @@ begin
   year := _y;
   unixTime := 0;
   
-  for i := 1 to year-1 do begin
+  for i := 1970 to year-1 do begin
     if ((i div 4 = 0) and not (i div 100 = 0)) or (i div 400 = 0) 
       then unixTime := unixTime + 8784
     else unixTime := unixTime + 8760;
