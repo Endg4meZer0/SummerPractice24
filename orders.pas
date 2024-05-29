@@ -215,10 +215,10 @@ begin
   end;
 
   j := 0;
-  for i := 1 to ol.prod_list.Count do begin
+  for i := 1 to o.prod_list.Count do begin
     // ОТСОРТИРОВАННОСТЬ СПИСКА ТОВАРОВ
     if j <> 0 then
-      if s.prod_list.list[i].code < j then begin 
+      if o.prod_list.list[i].code < j then begin 
         append_err(err_string, 'СПИСОК ТОВАРОВ: Список не отсортирован по кодам товаров.'); 
         allow_check := false; 
       end;
@@ -233,7 +233,7 @@ begin
       end;
       if not flag then append_err(err_string, 'ТОВАР №' + i.ToString() + ': Код товара не соответствует ни одному из зарегистрированных товаров.');
     end;
-    j := s.prod_list.list[i].code;
+    j := o.prod_list.list[i].code;
   end;
   Result := err_string;
 end;

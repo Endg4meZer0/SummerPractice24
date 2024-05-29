@@ -7,6 +7,11 @@ uses consts;
 uses products;
 uses orders;
 
+type shipped_prod = record
+  Code: integer;
+  Amount: integer;
+end;
+
 type shipment = record
   date: record // Дата ОТГРУЗКИ
     Day: integer;
@@ -14,9 +19,9 @@ type shipment = record
     Year: integer;
   end;
   order_code: integer;
-  prod_list: array[1..max_products] of record
-    Code: integer;
-    Amount: integer;
+  prod_list: record
+    List: array[1..max_products] of shipped_prod;
+    Count: integer;
   end;
 end;
 list_ship = record
@@ -40,8 +45,9 @@ begin
   
   i := 1;
   while (i <= max_products) and (s <> '') do begin
-    val(get_next(s), Result.prod_list[i].code, err);
-    val(get_next(s), Result.prod_list[i].amount, err);
+    val(get_next(s), Result.prod_list.list[i].code, err);
+    val(get_next(s), Result.prod_list.list[i].amount, err);
+    Result.prod_list.count := i;
     i := i + 1;
   end;
 end;
@@ -162,7 +168,7 @@ end;
 
 function validateShipmentObject(s: shipment; ol: list_ord; pl: list_prod): string;
 var i, j: integer;
-var flag: boolean;
+var flag, allow_check: boolean;
 var err_string: string;
 var ord: order;
 begin
@@ -185,12 +191,11 @@ begin
   if ord.code = -1 then append_err(err_string, 'КОД ЗАКАЗА: Код заказа не соответствует ни одному из зарегистрированных заказов.');
 
   // СПИСОК ТОВАРОВ
-  i := 1;
   j := 0;
-  while (i <= max_products) and (s.prod_list[i].code <> 0) do begin
+  for i := 1 to s.prod_list.count do begin
     // ОТСОРТИРОВАННОСТЬ СПИСКА ТОВАРОВ
     if j <> 0 then
-      if s.goods_list[i].code < j then begin 
+      if s.prod_list.list[i].code < j then begin 
         append_err(err_string, 'СПИСОК ТОВАРОВ: Список не отсортирован по кодам товаров.'); 
         allow_check := false; 
       end;
@@ -200,15 +205,14 @@ begin
       flag := false;
       j := 1;
       while not flag and (j <= pl.Count) do begin
-        if pl.List[j].code = s.prod_list[i].code then flag := true;
+        if pl.List[j].code = s.prod_list.list[i].code then flag := true;
         j := j + 1;
       end;
       if not flag then append_err(err_string, 'ТОВАР №' + i.ToString() + ': Код товара не соответствует ни одному из зарегистрированных товаров.')
       // СООТВЕТСТВИЕ СПИСКА ТОВАРОВ ОТГРУЗКИ СПИСКУ ТОВАРОВ ЗАКАЗА
-      else if (ord.code <> -1) and (s.prod_list[i].code <> ord.prod_list[i].Code) then append_err(err_string, 'ТОВАР №' + i.ToString() + ': Код товара не соответствует списку товаров заказа.');
+      else if (ord.code <> -1) and (s.prod_list.list[i].code <> ord.prod_list.list[i].Code) then append_err(err_string, 'ТОВАР №' + i.ToString() + ': Код товара не соответствует списку товаров заказа.');
     end;
-    j := s.prod_list[i].code;
-    i := i + 1;
+    j := s.prod_list.list[i].code;
   end;
   Result := err_string;
 end;

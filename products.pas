@@ -36,6 +36,7 @@ var t_s: string;
 var t_i: integer;
 var t_r: real;
 var t_err: integer;
+var t_flag: boolean;
 var tab_lengths: array of integer = (8, 32, 10);
 begin
   err_string := validate(s, tab_lengths);

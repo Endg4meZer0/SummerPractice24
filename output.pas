@@ -44,8 +44,8 @@ begin
     while ordCounter <= lo.Count do begin
       i := 1;
       orderHasProduct := false;
-      while (i <= max_products) and (lo.List[ordCounter].prod_list[i].Code <> 0) and not orderHasProduct do begin
-        if (lo.List[ordCounter].prod_list[i].Code = prod.code) and (lo.List[ordCounter].date.Year = year) then orderHasProduct := true;
+      while (i <= lo.List[ordCounter].prod_list.count) and not orderHasProduct do begin
+        if (lo.List[ordCounter].prod_list.list[i].Code = prod.code) and (lo.List[ordCounter].date.Year = year) then orderHasProduct := true;
         i := i + 1;
       end;
       if orderHasProduct then begin
@@ -61,12 +61,12 @@ begin
         
         if shipmentExists then begin
           ship := ls.List[shipCounter];
-          res := res + makeOutputProdString(ord.name, prod.cost, ord.prod_list[i].Amount, ship.prod_list[i].Amount) + char(10);
-          prodShipped := prodShipped + ship.prod_list[i].Amount;
+          res := res + makeOutputProdString(ord.name, prod.cost, ord.prod_list.list[i].Amount, ship.prod_list.list[i].Amount) + char(10);
+          prodShipped := prodShipped + ship.prod_list.list[i].Amount;
         end else begin
-          res := res + makeOutputProdString(ord.name, prod.cost, ord.prod_list[i].Amount, 0) + char(10);
+          res := res + makeOutputProdString(ord.name, prod.cost, ord.prod_list.list[i].Amount, 0) + char(10);
         end;
-        prodOrdered := prodOrdered + ord.prod_list[i].Amount;
+        prodOrdered := prodOrdered + ord.prod_list.list[i].Amount;
       end;
       
       ordCounter := ordCounter + 1;
