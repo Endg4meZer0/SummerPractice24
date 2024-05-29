@@ -95,8 +95,15 @@ var i: integer;
 var err_string: string;
 begin
   err_string := '';
+  
+  // УНИКАЛЬНОСТЬ КОДА ТОВАРА
   for i := 1 to pl.Count do begin
     if pl.List[i].code = p.code then append_err(err_string, 'КОД ТОВАРА: Произошёл конфликт в виде повтора кода товара с кодом другого уже зарегистрированного товара.');
+  end;
+  
+  // УНИКАЛЬНОСТЬ НАИМЕНОВАНИЯ ТОВАРА
+  for i := 1 to pl.Count do begin
+    if pl.List[i].name = p.name then append_err(err_string, 'КОД ТОВАРА: Произошёл конфликт в виде повтора наименования товара с наименованием другого уже зарегистрированного товара.');
   end;
   
   Result := err_string;

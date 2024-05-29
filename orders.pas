@@ -217,7 +217,8 @@ begin
     // ОТСОРТИРОВАННОСТЬ СПИСКА ТОВАРОВ
     if j <> 0 then
       if o.prod_list.list[i].code < j then begin 
-        append_err(err_string, 'СПИСОК ТОВАРОВ: Список не отсортирован по кодам товаров.'); 
+        if o.prod_list.List[i].code = j then append_err(err_string, 'СПИСОК ТОВАРОВ: Обнаружено два одинаковых кода товара в списке.')
+        else append_err(err_string, 'СПИСОК ТОВАРОВ: Список не отсортирован по кодам товаров.'); 
         allow_check := false; 
       end;
     
