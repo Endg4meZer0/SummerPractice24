@@ -27,7 +27,7 @@ begin
   
   file_record_count := 0;
   l_prod.Count := 0;
-  while (not eof(f_prod)) and (l_prod.Count <= possible_records) do begin
+  while (not eof(f_prod)) and (l_prod.Count < possible_records) do begin
     err_string := '';
     readln(f_prod, line);
     file_record_count := file_record_count + 1;
@@ -53,7 +53,7 @@ begin
   else begin
     file_record_count := 0;
     l_ord.Count := 0;
-    while (not eof(f_ord)) and (l_ord.Count <= possible_records) do begin
+    while (not eof(f_ord)) and (l_ord.Count < possible_records) do begin
       err_string := '';
       readln(f_ord, line);
       file_record_count := file_record_count + 1;
@@ -79,7 +79,7 @@ begin
     else begin
       file_record_count := 0;
       l_ship.Count := 0;
-      while (not eof(f_ship)) and (l_ship.Count <= possible_records) do begin
+      while (not eof(f_ship)) and (l_ship.Count < possible_records) do begin
         err_string := '';
         readln(f_ship, line);
         file_record_count := file_record_count + 1;

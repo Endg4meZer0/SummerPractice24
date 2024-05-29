@@ -35,6 +35,7 @@ var err_string: string;
 var t_s: string;
 var t_i: integer;
 var t_r: real;
+var t_flag: boolean;
 var t_err: integer;
 var tab_lengths: array of integer = (8, 32, 10);
 begin
@@ -61,8 +62,12 @@ begin
     // Проверка на оканчивание имени НЕ на пробел или _
     if t_s[t_s.Length] = '_' then append_err(err_string, 'НАИМЕНОВАНИЕ ТОВАРА: Наименование товара не может оканчиваться на нижнее подчёркивание.');
     
-    // Проверка на отсутствие пробелов внутри имени
-    if pos(' ', t_s) <> 0 then append_err(err_string, 'НАИМЕНОВАНИЕ ТОВАРА: Внутри наименования товара не должно быть пробелов. В качестве разделителя используйте нижнее подчёркивание.');
+    // Проверка на отсутствие невалидных символов
+    t_flag := false;
+    for t_i := 1 to t_s.Length do begin
+      if t_s[t_i] not in ['A'..'Z', 'А'..'Я', 'a'..'z', 'а'..'я', '0'..'9', '_'] then t_flag := true;
+    end;
+    if t_flag then append_err(err_string, 'НАИМЕНОВАНИЕ ТОВАРА: Обнаружены неприемлимые символы. Разрешены только русский и английский алфавит, цифры и нижнее подчёркивание.');
     
     // -------- СТОИМОСТЬ ТОВАРА --------
     t_s := get_next(s, tab_lengths[2]);

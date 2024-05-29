@@ -6,6 +6,11 @@ uses space_one;
 uses consts;
 uses products;
 
+type ordered_prod = record
+  code: integer;
+  amount: integer;
+end;
+
 type order = record
   code: integer;
   name: string;
@@ -15,9 +20,9 @@ type order = record
     Month: integer;
     Year: integer;
   end;
-  prod_list: array[1..max_products] of record
-      Code: integer;
-      Amount: integer;
+  prod_list: record
+      List: array[1..max_products] of ordered_prod;
+      Count: integer;
   end;
 end;
 list_ord = record
@@ -43,8 +48,9 @@ begin
   
   i := 1;
   while (i <= max_products) and (s <> '') do begin
-    val(get_next(s), Result.prod_list[i].code, err);
-    val(get_next(s), Result.prod_list[i].amount, err);
+    val(get_next(s), Result.prod_list.List[i].code, err);
+    val(get_next(s), Result.prod_list.List[i].amount, err);
+    Result.prod_list.Count := i;
     i := i+1;
   end;
 end;
@@ -87,6 +93,13 @@ begin
     
     // Проверка на оканчивание имени НЕ на _
     if t_s[t_s.Length] = '_' then append_err(err_string, 'НАИМЕНОВАНИЕ ЗАКАЗЧИКА: Наименование заказчика не может оканчиваться на нижнее подчёркивание.');
+    
+    // Проверка на отсутствие невалидных символов
+    t_flag := false;
+    for t_i := 1 to t_s.Length do begin
+      if t_s[t_i] not in ['A'..'Z', 'А'..'Я', 'a'..'z', 'а'..'я', '0'..'9', '_'] then t_flag := true;
+    end;
+    if t_flag then append_err(err_string, 'НАИМЕНОВАНИЕ ЗАКАЗЧИКА: Обнаружены неприемлимые символы. Разрешены только русский и английский алфавит, цифры и нижнее подчёркивание.');
     
     // -------- НОМЕР ТЕЛЕФОНА --------
     // Пример: 78009921385
@@ -189,24 +202,38 @@ end;
 
 function validateOrderObject(o: order; ol: list_ord; pl: list_prod): string;
 var i, j: integer;
-var flag: boolean;
+var flag, allow_check: boolean;
 var err_string: string;
 begin
   err_string := '';
+  allow_check := true;
+
+  // УНИКАЛЬНОСТЬ
   for i := 1 to ol.Count do begin
     if ol.List[i].code = o.code then append_err(err_string, 'КОД ЗАКАЗА: Произошёл конфликт в виде совпадения кода заказа с кодом другого уже зарегистрированного заказа.');
     if (ol.List[i].phone = o.phone) and (ol.List[i].name <> o.name) then append_err(err_string, 'НОМЕР ТЕЛЕФОНА: Один и тот же номер телефона не может принадлежать разным заказчикам.');
   end;
-  i := 1;
-  while (i <= max_products) and (o.prod_list[i].Code <> 0) do begin
-    flag := false;
-    j := 1;
-    while (j <= pl.Count) and not flag do begin
-      if pl.List[j].code = o.prod_list[i].code then flag := true;
-      j := j + 1;
+
+  j := 0;
+  for i := 1 to ol.prod_list.Count do begin
+    // ОТСОРТИРОВАННОСТЬ СПИСКА ТОВАРОВ
+    if j <> 0 then
+      if s.prod_list.list[i].code < j then begin 
+        append_err(err_string, 'СПИСОК ТОВАРОВ: Список не отсортирован по кодам товаров.'); 
+        allow_check := false; 
+      end;
+    
+    if allow_check then begin
+      flag := false;
+      j := 1;
+      // СУЩЕСТВОВАНИЕ ТОВАРОВ ИЗ СПИСКА
+      while (j <= pl.Count) and not flag do begin
+        if pl.List[j].code = o.prod_list.list[i].code then flag := true;
+        j := j + 1;
+      end;
+      if not flag then append_err(err_string, 'ТОВАР №' + i.ToString() + ': Код товара не соответствует ни одному из зарегистрированных товаров.');
     end;
-    if not flag then append_err(err_string, 'ТОВАР №' + i.ToString() + ': Код товара не соответствует ни одному из зарегистрированных товаров.');
-    i := i + 1;
+    j := s.prod_list.list[i].code;
   end;
   Result := err_string;
 end;

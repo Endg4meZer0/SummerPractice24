@@ -55,7 +55,7 @@ begin
             j := j+1;
           end;
         end;
-        if err_flag then append_err(err_string, 'ФОРМАТ ДАННЫХ: Не соблюдено выравнивание по левому краю в ' + (i+1).ToString() + '-м поле.');
+        if err_flag then append_err(err_string, 'ФОРМАТ ДАННЫХ: После пробелов в ' + (i+1).ToString() + '-м поле обнаружены новые данные. Возможно не соблюдено выравнивание по левому краю.');
         lengths_sum := lengths_sum + lengths[i] + 1;
       end;
     end;

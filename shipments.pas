@@ -168,6 +168,9 @@ var ord: order;
 begin
   ord.code := -1;
   err_string := '';
+  allow_check := true;
+
+  // ДАТА
   i := 1;
   while (i <= ol.Count) and not flag do begin
     if ol.List[i].code = s.order_code then begin
@@ -177,17 +180,34 @@ begin
     end;
     i := i + 1;
   end;
+
+  // СУЩЕСТВОВАНИЕ ЗАКАЗА ПО КОДУ
   if ord.code = -1 then append_err(err_string, 'КОД ЗАКАЗА: Код заказа не соответствует ни одному из зарегистрированных заказов.');
+
+  // СПИСОК ТОВАРОВ
   i := 1;
+  j := 0;
   while (i <= max_products) and (s.prod_list[i].code <> 0) do begin
-    flag := false;
-    j := 1;
-    while not flag and (j <= pl.Count) do begin
-      if pl.List[j].code = s.prod_list[i].code then flag := true;
-      j := j + 1;
+    // ОТСОРТИРОВАННОСТЬ СПИСКА ТОВАРОВ
+    if j <> 0 then
+      if s.goods_list[i].code < j then begin 
+        append_err(err_string, 'СПИСОК ТОВАРОВ: Список не отсортирован по кодам товаров.'); 
+        allow_check := false; 
+      end;
+
+    // СУЩЕСТВОВАНИЕ ТОВАРОВ ИЗ СПИСКА
+    if allow_check then begin
+      flag := false;
+      j := 1;
+      while not flag and (j <= pl.Count) do begin
+        if pl.List[j].code = s.prod_list[i].code then flag := true;
+        j := j + 1;
+      end;
+      if not flag then append_err(err_string, 'ТОВАР №' + i.ToString() + ': Код товара не соответствует ни одному из зарегистрированных товаров.')
+      // СООТВЕТСТВИЕ СПИСКА ТОВАРОВ ОТГРУЗКИ СПИСКУ ТОВАРОВ ЗАКАЗА
+      else if (ord.code <> -1) and (s.prod_list[i].code <> ord.prod_list[i].Code) then append_err(err_string, 'ТОВАР №' + i.ToString() + ': Код товара не соответствует списку товаров заказа.');
     end;
-    if not flag then append_err(err_string, 'ТОВАР №' + i.ToString() + ': Код товара не соответствует ни одному из зарегистрированных товаров.')
-    else if (ord.code <> -1) and (s.prod_list[i].code <> ord.prod_list[i].Code) then append_err(err_string, 'ТОВАР №' + i.ToString() + ': Код товара не соответствует списку товаров заказа.');
+    j := s.prod_list[i].code;
     i := i + 1;
   end;
   Result := err_string;
