@@ -13,11 +13,7 @@ type shipped_prod = record
 end;
 
 type shipment = record
-  date: record // Дата ОТГРУЗКИ
-    Day: integer;
-    Month: integer;
-    Year: integer;
-  end;
+  date: consts.Date; // Дата ОТГРУЗКИ
   order_code: integer;
   prod_list: record
     List: array[1..max_products] of shipped_prod;
@@ -37,10 +33,12 @@ implementation
 
 function makeShipmentObjectFromString(s: string): shipment;
 var i, err: integer;
+var _d, _m, _y: integer;
 begin
-  val(get_next(s), Result.date.day, err);
-  Result.date.month := months.IndexOf(get_next(s)) + 1;
-  val(get_next(s), Result.date.year, err);
+  val(get_next(s), _d, err);
+  _m := months.IndexOf(get_next(s)) + 1;
+  val(get_next(s), _y, err);
+  Result.date := Date.create(_d, _m, _y);
   val(get_next(s), Result.order_code, err);
   
   i := 1;
@@ -170,9 +168,9 @@ function validateShipmentObject(s: shipment; ol: list_ord; pl: list_prod): strin
 var i, j: integer;
 var flag, allow_check: boolean;
 var err_string: string;
-var ord: order;
+var o: order;
 begin
-  ord.code := -1;
+  o.code := -1;
   err_string := '';
   allow_check := true;
 
@@ -180,18 +178,15 @@ begin
   i := 1;
   while (i <= ol.Count) and not flag do begin
     if ol.List[i].code = s.order_code then begin
-      ord := ol.List[i];
-      if
-        (ord.date.year >= s.date.year) and 
-        (ord.date.month >= s.date.month) and 
-        (ord.date.day >= s.date.day)
-      then append_err(err_string, 'ДАТА: Дата отгрузки товаров по заказу не может быть установлена раньше, чем дата поступления самого заказа.');
+      o := ol.List[i];
+      if s.date.compare(o.date) = -1
+        then append_err(err_string, 'ДАТА: Дата отгрузки товаров по заказу не может быть установлена раньше, чем дата поступления самого заказа.');
     end;
     i := i + 1;
   end;
 
   // СУЩЕСТВОВАНИЕ ЗАКАЗА ПО КОДУ
-  if ord.code = -1 then append_err(err_string, 'КОД ЗАКАЗА: Код заказа не соответствует ни одному из зарегистрированных заказов.');
+  if o.code = -1 then append_err(err_string, 'КОД ЗАКАЗА: Код заказа не соответствует ни одному из зарегистрированных заказов.');
 
   // СПИСОК ТОВАРОВ
   j := 0;
@@ -213,7 +208,7 @@ begin
       end;
       if not flag then append_err(err_string, 'ТОВАР №' + i.ToString() + ': Код товара не соответствует ни одному из зарегистрированных товаров.')
       // СООТВЕТСТВИЕ СПИСКА ТОВАРОВ ОТГРУЗКИ СПИСКУ ТОВАРОВ ЗАКАЗА
-      else if (ord.code <> -1) and (s.prod_list.list[i].code <> ord.prod_list.list[i].Code) then append_err(err_string, 'ТОВАР №' + i.ToString() + ': Код товара не соответствует списку товаров заказа.');
+      else if (o.code <> -1) and (s.prod_list.list[i].code <> o.prod_list.list[i].Code) then append_err(err_string, 'ТОВАР №' + i.ToString() + ': Код товара не соответствует списку товаров заказа.');
     end;
     j := s.prod_list.list[i].code;
   end;

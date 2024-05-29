@@ -42,7 +42,7 @@ begin
       end;
       
       // Проверка на выравнивание по левому краю
-      lengths_sum := 0;
+      lengths_sum := 1;
       for i := 0 to lengths.Length-1 do begin
         t_string := copy(s, lengths_sum, lengths[i]);
         if t_string[1] = ' ' then append_err(err_string, 'ФОРМАТ ДАННЫХ: Не соблюдено выравнивание по левому краю в ' + (i+1).ToString() + '-м поле.');

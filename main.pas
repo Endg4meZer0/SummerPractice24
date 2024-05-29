@@ -1,8 +1,5 @@
 ﻿program letpract;
 
-
-// TODO!!!: выходной файлик по условию
-
 uses consts; // модуль констант, общих для всей программы
 uses products, orders, shipments; // модули работы с отдельными входными файлами
 uses sort; // модуль сортировки

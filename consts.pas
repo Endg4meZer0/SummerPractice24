@@ -1,34 +1,48 @@
 ﻿unit consts;
 interface
 
-type date = class
+type Date = class
   private
     day, month, year: integer;
-    unixTime: integer;
+    unixTime: int64;
   public
     constructor create(_d, _m, _y: integer);
     function compare(_d: date): integer;
     function getDay(): integer;
     function getMonth(): integer;
     function getYear(): integer;
+    function getUnix(): int64;
 end;
 
-function getDay(): integer;
+const possible_records = 100;
+const max_products = 25;
+const months: array of string = (
+  'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'
+);
+
+implementation
+
+function Date.getDay(): integer;
 begin
   result := day;
 end;
 
-function getMonth(): integer;
+function Date.getMonth(): integer;
 begin
   result := month;
 end;
 
-function getYear(): integer;
+function Date.getYear(): integer;
 begin
   result := year;
 end;
 
-constructor date.create(_d, _m, _y: integer);
+function Date.getUnix(): int64;
+begin
+  result := unixTime;
+end;
+
+constructor Date.create(_d, _m, _y: integer);
 var i: integer;
 begin
   day := _d;
@@ -44,11 +58,11 @@ begin
 
   for i := 1 to month-1 do begin
     case i of
-      1,3,5,7,8,10: unixTime := unixTime + 31 * 24
-      4,6,9,11: unixTime := unixTime + 30 * 24
+      1,3,5,7,8,10: unixTime := unixTime + 31 * 24;
+      4,6,9,11: unixTime := unixTime + 30 * 24;
       2: if ((year div 4 = 0) and not (year div 100 = 0)) or (year div 400 = 0)
           then unixTime := unixTime + 29 * 24
-         else unixTime := unixTime + 28 * 24
+         else unixTime := unixTime + 28 * 24;
     end;
   end;
   
@@ -57,19 +71,14 @@ begin
   end;
 end;
 
-function date.compare(_d: date): integer;
+function Date.compare(_d: date): integer;
+var d1, d2: int64;
 begin
-  if date.unixTime > _d.unixTime then result := 1
-  else if date.unixTime < _d.unixTime then result := -1
+  d1 := getUnix();
+  d2 := _d.getUnix();
+  if d1 > d2 then result := 1
+  else if d1 < d2 then result := -1
   else result := 0;
 end;
-
-const possible_records = 100;
-const max_products = 25;
-const months: array of string = (
-  'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'
-);
-
-implementation
 
 end.

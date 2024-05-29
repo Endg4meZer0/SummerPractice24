@@ -15,11 +15,7 @@ type order = record
   code: integer;
   name: string;
   phone: int64;
-  date: record // Дата ПОСТУПЛЕНИЯ заказа
-    Day: integer;
-    Month: integer;
-    Year: integer;
-  end;
+  date: consts.Date; // Дата ПОСТУПЛЕНИЯ заказа
   prod_list: record
       List: array[1..max_products] of ordered_prod;
       Count: integer;
@@ -38,13 +34,15 @@ implementation
 
 function makeOrderObjectFromString(s: string): order;
 var i, err: integer;
+var _d, _m, _y: integer;
 begin
   val(get_next(s), Result.code, err);
   Result.name := get_next(s);
   val(get_next(s), Result.phone, err);
-  val(get_next(s), Result.date.day, err);
-  Result.date.month := months.IndexOf(get_next(s)) + 1;
-  val(get_next(s), Result.date.year, err);
+  val(get_next(s), _d, err);
+  _m := months.IndexOf(get_next(s)) + 1;
+  val(get_next(s), _y, err);
+  Result.date := Date.create(_d, _m, _y);
   
   i := 1;
   while (i <= max_products) and (s <> '') do begin

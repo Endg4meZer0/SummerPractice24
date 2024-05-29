@@ -45,7 +45,7 @@ begin
       i := 1;
       orderHasProduct := false;
       while (i <= lo.List[ordCounter].prod_list.count) and not orderHasProduct do begin
-        if (lo.List[ordCounter].prod_list.list[i].Code = prod.code) and (lo.List[ordCounter].date.Year = year) then orderHasProduct := true;
+        if (lo.List[ordCounter].prod_list.list[i].Code = prod.code) and (lo.List[ordCounter].date.getYear() = year) then orderHasProduct := true;
         i := i + 1;
       end;
       if orderHasProduct then begin
@@ -56,7 +56,7 @@ begin
         shipmentExists := false;
         while (shipCounter <= ls.Count) and not shipmentExists do begin
           shipCounter := shipCounter + 1;
-          if (ls.List[shipCounter].order_code = ord.code) and (ls.List[shipCounter].date.Year = year) then shipmentExists := true;
+          if (ls.List[shipCounter].order_code = ord.code) and (ls.List[shipCounter].date.getYear() = year) then shipmentExists := true;
         end;
         
         if shipmentExists then begin
