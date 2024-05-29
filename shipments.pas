@@ -181,8 +181,11 @@ begin
   while (i <= ol.Count) and not flag do begin
     if ol.List[i].code = s.order_code then begin
       ord := ol.List[i];
-      if (ord.date.year > s.date.year) or (ord.date.month > s.date.month) or (ord.date.day > s.date.day) then
-        append_err(err_string, 'ДАТА: Дата отгрузки товаров по заказу не может быть установлена раньше, чем дата поступления самого заказа.');
+      if
+        (ord.date.year >= s.date.year) and 
+        (ord.date.month >= s.date.month) and 
+        (ord.date.day >= s.date.day)
+      then append_err(err_string, 'ДАТА: Дата отгрузки товаров по заказу не может быть установлена раньше, чем дата поступления самого заказа.');
     end;
     i := i + 1;
   end;
