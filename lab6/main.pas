@@ -39,16 +39,18 @@ begin
       end;
     end;
   end;
-  if not eof(f_prod) and (l_prod.Count > possible_records) then writeln(f_err, 'Слишком много записей о товарах. Зарегистрировано максимальное доступное количество (' + possible_records.ToString() + ').');
+  if not eof(f_prod) and (l_prod.Count = possible_records) then writeln('Слишком много записей о товарах. Зарегистрировано максимальное доступное количество (' + possible_records.ToString() + ').');
   close(f_prod);
   close(f_err);
   
-  quickSort(l_prod, 1, l_prod.Count);
-  
-  assign(f_out, 'products_out.txt');
-  rewrite(f_out);
-  
-  printSheet(l_prod, f_out);
-  
-  close(f_out);
+  if (l_prod.Count = 0) then writeln('В файле о товарах отсутствуют валидные записи! Выходной файл не будет создан.')
+  else begin
+    quickSort(l_prod, 1, l_prod.Count);
+    
+    assign(f_out, 'products_out.txt');
+    rewrite(f_out);
+    
+    printSheet(l_prod, f_out);
+    close(f_out);
+  end;
 end.

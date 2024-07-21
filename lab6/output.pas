@@ -35,6 +35,7 @@ begin
   res := prod.cost.ToString();
   result := result + res;
   for i := 1 to 10 - res.Length do result := result + ' ';
+  result := result + '|';
 end;
 
 

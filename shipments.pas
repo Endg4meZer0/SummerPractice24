@@ -8,8 +8,8 @@ uses products;
 uses orders;
 
 type shipped_prod = record
-  Code: integer;
-  Amount: integer;
+  code: integer;
+  amount: integer;
 end;
 
 type shipment = record

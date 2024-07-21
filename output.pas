@@ -11,7 +11,7 @@ implementation
 
 procedure printSheet(lp: list_prod; lo: list_ord; ls: list_ship; year: integer; f: text);
 var prodCounter, ordCounter, shipCounter, i: integer;
-    productGotOrderedThisYear, orderHasProduct, shipmentExists: boolean;
+    orderHasProduct, shipmentExists: boolean;
     prod: product;
     ord: order;
     ship: shipment;
@@ -35,7 +35,6 @@ begin
   
   prodCounter := 1;
   while prodCounter <= lp.Count do begin
-    productGotOrderedThisYear := false;
     res := '';
     prod := lp.List[prodCounter];
     prodOrdered := 0; prodShipped := 0;
@@ -72,7 +71,7 @@ begin
       ordCounter := ordCounter + 1;
     end;
     
-    if productGotOrderedThisYear then begin
+    if (prodOrdered <> 0) then begin
       write(f, res);
       writeln(f, makeOutputProdString('Итого по товару:', 0, prodOrdered, prodShipped));
     
