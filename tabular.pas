@@ -46,7 +46,9 @@ begin
       for i := 0 to lengths.Length-1 do begin
         t_string := copy(s, lengths_sum, lengths[i]);
         if t_string[1] = ' ' then append_err(err_string, 'ФОРМАТ ДАННЫХ: Не соблюдено выравнивание по левому краю в ' + (i+1).ToString() + '-м поле.');
-        if pos(' ', t_string.Trim()) <> 0 then append_err(err_string, 'ФОРМАТ ДАННЫХ: Обнаружено разделение данных пробелом в ' + (i+1).ToString() + '-м поле.');
+        while t_string[1] = ' ' do t_string := copy(t_string, 2, t_string.Length);
+        while t_string[t_string.Length] = ' ' do t_string := copy(t_string, 1, t_string.Length-1);
+        if pos(' ', t_string) <> 0 then append_err(err_string, 'ФОРМАТ ДАННЫХ: Обнаружено разделение данных пробелом в ' + (i+1).ToString() + '-м поле.');
 
         lengths_sum := lengths_sum + lengths[i] + 1;
       end;

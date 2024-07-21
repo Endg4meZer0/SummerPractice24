@@ -101,8 +101,11 @@ begin
       quickSort(l_prod, 1, l_prod.Count);
       quickSort(l_ord, 1, l_ord.Count);
       
-      write('Введите год для создания ведомости: ');
-      readln(sheetYear);
+      sheetYear := 0;
+      while (sheetYear < 2000) or (sheetYear > 2099) do begin
+        write('Введите год для создания отчёта (2000-2099): ');
+        readln(sheetYear);
+      end;
       
       assign(f_out, 'sheet_' + sheetYear.ToString() + '.txt');
       rewrite(f_out);
