@@ -11,7 +11,7 @@ implementation
 
 procedure printSheet(lp: list_prod; lo: list_ord; ls: list_ship; year: integer; f: text);
 var prodCounter, ordCounter, shipCounter, i: integer;
-    orderHasProduct, shipmentExists: boolean;
+    orderHasProduct, shipmentExists, productGotOrderedThisYear: boolean;
     prod: product;
     ord: order;
     ship: shipment;
@@ -93,7 +93,9 @@ begin
   for i := 1 to 32 - orderName.Length do result := result + ' ';
   result := result + '    '; // те самые 4 пробела между полями
   res := cost.ToString();
-  if res = '0' then res := '';
+  if res = '0' then res := ''
+  else if pos('.', res) = 0 then res := res + '.00'
+  else if pos('.', res) = res.Length - 1 then res := res + '0';
   result := result + res;
   for i := 1 to 12 - res.Length do result := result + ' '; // на 2 пробела больше
   result := result + '    ';
